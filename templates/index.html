@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digital Wallet Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>Digital Wallet Dashboard</h1>
+
+    <div class="card">
+        <h2>Monthly Spend</h2>
+        <p>£{{ data.monthly_spend }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Monthly Transactions</h2>
+        <p>{{ data.monthly_transactions }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Fraud Rate</h2>
+        <p>{{ data.fraud_rate }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Declines</h2>
+        <p>{{ data.declines }}</p>
+    </div>
+
+    <h2>Add a Transaction</h2>
+    <form method="POST">
+        <input type="number" step="0.01" name="amount" placeholder="Enter amount" required>
+        <button type="submit">Add</button>
+    </form>
+
+    {% if new_transaction %}
+        <p class="success">Added £{{ new_transaction }} successfully!</p>
+    {% endif %}
+
+</body>
+</html>
