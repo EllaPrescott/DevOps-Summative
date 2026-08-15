@@ -32,6 +32,8 @@ jobs:
     name: Deploy to EC2
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      ec2_ip: ${{ steps.tf-ip.outputs.ip }}
 
     steps:
       - name: Checkout Code
@@ -67,9 +69,6 @@ jobs:
          RAW=$(terraform output -raw ec2_public_ip)
           CLEAN=$(echo "$RAW" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}')
           echo "ip=$CLEAN" >> "$GITHUB_OUTPUT"
-        outputs:
-          ip: ${{ steps.tf-ip.outputs.ip }
-
 
 
 
