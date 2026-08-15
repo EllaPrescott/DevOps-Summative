@@ -1,9 +1,56 @@
+# VPC creation
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  tags = {
+    Name = "github-actions-vpc"
+  }
+}
+
+# Public subnet creation
+resource "aws_subnet" "public" {
+  vpc_id = aws_vpc.main.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet"
+  }
+}
+
+# Internet Gateway creation
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "github-actions-igw"
+  }
+}
+
+# Route Table creation and association with the public subnet
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+
 # Security group configuration and incoming/outgoing rules for Flask app and SSH access
 
 resource "aws_security_group" "flask" {
   name        = "flask-sg"
   description = "Allow Flask and SSH"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "Flask App"
@@ -30,18 +77,6 @@ resource "aws_security_group" "flask" {
 }
 
 
-# Establishing AWS Academy default VPC and subnet for the Flask application instance
-
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnet" "default" {
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
-  }
-}
 
 
 # AMI selection for the Flask application instance using Amazon Linux 2023
@@ -62,7 +97,7 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "flask" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t2.micro"
-  subnet_id              = data.aws_subnet.default.id
+  subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.flask.id]
   associate_public_ip_address = true
   key_name              = "vockey"

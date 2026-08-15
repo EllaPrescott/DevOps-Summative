@@ -22,10 +22,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r app/requirements.txt
 
       - name: Run Tests
-        run: pytest
+        run: pytest app/tests/app_test.py
 
 
   deploy:
@@ -37,6 +37,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Lecturer-required AWS credentials block
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -45,28 +46,54 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      # Terraform provisioning
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      - name: Get EC2 Public IP
+        id: get-ip
+        working-directory: terraform
+        run: echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
+      # SSH key setup
       - name: Create private key file for SSH
         run: |
-         mkdir -p ~/.ssh
-         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/labuser.pem
-         chmod 600 ~/.ssh/labuser.pem
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/labsuser.pem
+          chmod 600 ~/.ssh/labsuser.pem
 
+      # Install Ansible
       - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
-      - name: Run Ansible playbook
+      # Dynamic inventory (correct!)
+      - name: Create Ansible Inventory
+        run: |
+          echo "[web]" > ansible/inventory.ini
+          echo "${{ env.EC2_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/labsuser.pem" >> ansible/inventory.ini
+
+      # Run Ansible playbook
+      - name: Run Ansible Playbook
         working-directory: ansible
         run: ansible-playbook -i inventory.ini playbook.yml
 
+      # Deploy Flask App
       - name: Deploy Flask App via SSH
         run: |
-         ssh -o StrictHostKeyChecking=no -i ~/.ssh/labuser.pem ec2-user@${{ secrets.EC2_IP }} "
-           cd /opt/flaskapp;
-           rm -rf app;
-           git clone https://github.com/${{ github.repository }} app;
-           cd app;
-           pip3 install -r requirements.txt;
-           pkill -f app.py || true;
-           nohup python3 app.py > app.log 2>&1 &
-         "
-
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ env.EC2_IP }} "
+            sudo mkdir -p /opt/flaskapp;
+            sudo rm -rf /opt/flaskapp/app;
+            sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app;
+            cd /opt/flaskapp/app;
+            sudo pip3 install -r requirements.txt;
+            sudo pkill -f app.py || true;
+            nohup sudo python3 app.py > app.log 2>&1 &
+          "
