@@ -63,7 +63,7 @@ jobs:
         id: tf-ip
         working-directory: terraform
         env:
-          TF_LOG: ""     # ← THIS FIXES YOUR PIPELINE
+          TF_LOG: ""     
         run: |
           IP=$(terraform output -raw ec2_public_ip)
           echo "ip=$IP" >> $GITHUB_OUTPUT
