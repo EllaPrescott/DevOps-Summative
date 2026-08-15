@@ -37,7 +37,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Lecturer-required AWS credentials block
+      # AWS credentials block
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -62,11 +62,11 @@ jobs:
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
-        env:
-          TF_LOG: ""     
         run: |
+          unset TF_LOG
           IP=$(terraform output -raw ec2_public_ip)
           echo "ip=$IP" >> $GITHUB_OUTPUT
+
 
       # SSH key setup
       - name: Create private key file for SSH
