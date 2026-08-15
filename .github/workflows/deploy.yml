@@ -58,10 +58,11 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-      - name: Get EC2 Public IP
-        id: get-ip
+      - name: Get EC2 public IP
+        id: tf-ip
         working-directory: terraform
-        run: echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+        run: echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+
 
       # SSH key setup
       - name: Create private key file for SSH
@@ -78,7 +79,7 @@ jobs:
       - name: Create Ansible Inventory
         run: |
           echo "[web]" > ansible/inventory.ini
-          echo "${{ env.EC2_IP }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/labsuser.pem" >> ansible/inventory.ini
+          echo "${{ steps.tf-ip.outputs.ip }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/labsuser.pem" >> ansible/inventory.ini
 
       # Run Ansible playbook
       - name: Run Ansible Playbook
@@ -88,12 +89,12 @@ jobs:
       # Deploy Flask App
       - name: Deploy Flask App via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ env.EC2_IP }} "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ steps.tf-ip.outputs.ip }} "
             sudo mkdir -p /opt/flaskapp;
             sudo rm -rf /opt/flaskapp/app;
             sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app;
             cd /opt/flaskapp/app;
-            sudo pip3 install -r requirements.txt;
+            sudo pip3 install -r app/requirements.txt;
             sudo pkill -f app.py || true;
             nohup sudo python3 app.py > app.log 2>&1 &
           "
