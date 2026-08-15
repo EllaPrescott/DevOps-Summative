@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+      uses: actions/checkout@v4
 
       # Lecturer-required AWS credentials block
       - name: Configure AWS Credentials
@@ -58,14 +58,17 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
+      # Install jq (needed for JSON parsing)
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Reliable EC2 IP extraction
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
         run: |
-          IP=$(terraform output -raw ec2_public_ip | head -n 1)
+          IP=$(terraform output -json ec2_public_ip | jq -r '.')
           echo "ip=$IP" >> $GITHUB_OUTPUT
-
-
 
       # SSH key setup
       - name: Create private key file for SSH
@@ -78,7 +81,7 @@ jobs:
       - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
-      # Dynamic inventory (correct!)
+      # Dynamic inventory
       - name: Create Ansible Inventory
         run: |
           echo "[web]" > ansible/inventory.ini
