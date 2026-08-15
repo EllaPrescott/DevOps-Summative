@@ -1,0 +1,28 @@
+- hosts: web
+  become: yes
+  tasks:
+    - name: Install required packages
+      yum:
+        name:
+          - python3
+          - python3-pip
+          - git
+          - nginx
+        state: present
+
+    - name: Ensure application directory exists
+      file:
+        path: /opt/flaskapp
+        state: directory
+        mode: '0777'
+
+    - name: Deploy nginx config
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/conf.d/flaskapp.conf
+
+    - name: Enable and restart nginx
+      service:
+        name: nginx
+        enabled: true
+        state: restarted

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - developer
 
 jobs:
 
@@ -42,19 +43,30 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: us-east-1
 
-      - name: Deploy Flask App via SSM
+      - name: Create private key file for SSH
         run: |
-          aws ssm send-command \
-            --instance-ids ${{ secrets.INSTANCE_ID }} \
-            --document-name "AWS-RunShellScript" \
-            --parameters commands="
-              cd /opt/application;
-              rm -rf app;
-              git clone https://github.com/${{ github.repository }} app;
-              cd app;
-              pip3 install -r requirements.txt;
-              pkill -f app.py || true;
-              nohup python3 app.py > app.log 2>&1 &
-            "
+         mkdir -p ~/.ssh
+         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/labuser.pem
+         chmod 600 ~/.ssh/labuser.pem
+
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: Run Ansible playbook
+        working-directory: ansible
+        run: ansible-playbook -i inventory.ini playbook.yml
+
+      - name: Deploy Flask App via SSH
+        run: |
+         ssh -o StrictHostKeyChecking=no -i ~/.ssh/labuser.pem ec2-user@${{ secrets.EC2_IP }} "
+           cd /opt/flaskapp;
+           rm -rf app;
+           git clone https://github.com/${{ github.repository }} app;
+           cd app;
+           pip3 install -r requirements.txt;
+           pkill -f app.py || true;
+           nohup python3 app.py > app.log 2>&1 &
+         "
+
