@@ -61,7 +61,10 @@ jobs:
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
-        run: echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+        run: |
+          IP=$(terraform output -raw ec2_public_ip | head -n 1)
+          echo "ip=$IP" >> $GITHUB_OUTPUT
+
 
 
       # SSH key setup
