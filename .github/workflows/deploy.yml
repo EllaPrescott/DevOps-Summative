@@ -58,16 +58,14 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-      # Install jq (needed for JSON parsing)
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      # Reliable EC2 IP extraction
+      # Clean Terraform output (no debug logs)
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
+        env:
+          TF_LOG: ""     # ← THIS FIXES YOUR PIPELINE
         run: |
-          IP=$(terraform output -json ec2_public_ip | jq -r '.')
+          IP=$(terraform output -raw ec2_public_ip)
           echo "ip=$IP" >> $GITHUB_OUTPUT
 
       # SSH key setup
