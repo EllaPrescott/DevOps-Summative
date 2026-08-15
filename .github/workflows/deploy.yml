@@ -58,14 +58,19 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-      # Clean Terraform output (no debug logs)
+
+      # EC2 public IP retrieval
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
         run: |
           unset TF_LOG
+          unset TF_LOG_CORE
+          unset TF_LOG_PROVIDER
+          unset TF_LOG_PATH
           IP=$(terraform output -raw ec2_public_ip)
           echo "ip=$IP" >> $GITHUB_OUTPUT
+
 
 
       # SSH key setup
