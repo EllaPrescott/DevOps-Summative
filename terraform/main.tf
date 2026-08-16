@@ -102,6 +102,10 @@ resource "aws_security_group" "flask" {
   }
 }
 
+resource "aws_key_pair" "vockey" {
+  key_name   = "vockey"
+  public_key = file("${path.module}/vockey.pub")
+}
 
 # EC2 instance creation for Flask App
 
@@ -111,7 +115,7 @@ resource "aws_instance" "flask" {
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.flask.id]
   associate_public_ip_address = true
-  key_name                    = "vockey"
+  key_name                    = aws_key_pair.vockey.key_name
 
   tags = {
     Name = "FlaskApp"
