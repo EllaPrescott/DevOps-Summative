@@ -1,7 +1,6 @@
 
 # Security group for Flask app and SSH access
 
-
 resource "aws_security_group" "flask" {
   name        = "flask-sg"
   description = "Allow Flask and SSH"
