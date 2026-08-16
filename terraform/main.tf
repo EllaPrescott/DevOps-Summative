@@ -6,8 +6,6 @@ resource "aws_security_group" "flask" {
   name        = "flask-sg"
   description = "Allow Flask and SSH"
 
-  # AWS Academy default VPC is used automatically
-  # (no vpc_id needed)
 
   ingress {
     description = "Flask App"
@@ -60,10 +58,8 @@ resource "aws_instance" "flask" {
 #!/bin/bash
 dnf update -y
 dnf install python3 python3-pip git -y
-
 mkdir -p /opt/application
 chmod 777 /opt/application
-
 echo "Server Ready" > /tmp/server-status.txt
 EOF
 

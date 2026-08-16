@@ -62,7 +62,7 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-      # EC2 public IP retrieval (CLEAN VERSION)
+      # EC2 public IP retrieval 
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
@@ -70,10 +70,6 @@ jobs:
           RAW=$(terraform output -raw ec2_public_ip)
           IP=$(echo "$RAW" | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}')
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
-
-
-      - name: Debug IP
-        run: echo EC2 IP=${{ steps.tf-ip.outputs.ip }}
 
       # SSH key setup
       - name: Create private key file for SSH
