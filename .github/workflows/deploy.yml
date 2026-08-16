@@ -60,17 +60,17 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-
-      # EC2 public IP retrieval
+      # EC2 public IP retrieval (CLEAN VERSION)
       - name: Get EC2 public IP
         id: tf-ip
         working-directory: terraform
         run: |
-          IP=$(terraform output -raw ec2_public_ip | tr -d '\r' | tr -d '\n' | tr -d '\t' | sed 's/ //g')
+          RAW=$(terraform output -raw ec2_public_ip)
+          IP=$(echo "$RAW" | tr -cd '0-9.')
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
 
-
-
+      - name: Debug IP
+        run: echo "EC2 IP is: '${{ steps.tf-ip.outputs.ip }}'"
 
       # SSH key setup
       - name: Create private key file for SSH
@@ -85,8 +85,13 @@ jobs:
 
       # Dynamic inventory
       - name: Generate Ansible Inventory
-        run: echo -e "[web]\n${{ steps.tf-ip.outputs.ip }}\n\n[web:vars]\nansible_user=ec2-user\nansible_ssh_private_key_file=~/.ssh/labsuser.pem" > ansible/inventory.ini
-
+        run: |
+          echo "[web]" > ansible/inventory.ini
+          echo "${{ steps.tf-ip.outputs.ip }}" >> ansible/inventory.ini
+          echo "" >> ansible/inventory.ini
+          echo "[web:vars]" >> ansible/inventory.ini
+          echo "ansible_user=ec2-user" >> ansible/inventory.ini
+          echo "ansible_ssh_private_key_file=~/.ssh/labsuser.pem" >> ansible/inventory.ini
 
       # Run Ansible playbook
       - name: Run Ansible Playbook
@@ -104,5 +109,5 @@ jobs:
             cd /opt/flaskapp/app
             sudo pip3 install -r app/requirements.txt
             sudo pkill -f app.py || true
-            nohup sudo python3 app.py > app.log 2>&1 & 
+            nohup sudo python3 app.py > app.log 2>&1 &
           EOF
