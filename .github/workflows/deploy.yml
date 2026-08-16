@@ -66,8 +66,9 @@ jobs:
         working-directory: terraform
         run: |
           RAW=$(terraform output -raw ec2_public_ip)
-          IP=$(echo "$RAW" | tr -cd '0-9.')
+          IP=$(echo "$RAW" | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}')
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
+
 
       - name: Debug IP
         run: echo EC2 IP=${{ steps.tf-ip.outputs.ip }}
