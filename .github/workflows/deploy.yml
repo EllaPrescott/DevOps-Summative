@@ -95,12 +95,13 @@ jobs:
 
       # Deploy Flask App
       - name: Deploy Flask App via SSH
-        run: ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ steps.tf-ip.outputs.ip }} << 'EOF'
-           sudo mkdir -p /opt/flaskapp
-           sudo rm -rf /opt/flaskapp/app
-           sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
-           cd /opt/flaskapp/app
-           sudo pip3 install -r app/requirements.txt
-           sudo pkill -f app.py || true
-           nohup sudo python3 app.py > app.log 2>&1 &
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ steps.tf-ip.outputs.ip }} << 'EOF'
+          sudo mkdir -p /opt/flaskapp
+          sudo rm -rf /opt/flaskapp/app
+          sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
+          cd /opt/flaskapp/app
+          sudo pip3 install -r app/requirements.txt
+          sudo pkill -f app.py || true
+          nohup sudo python3 app.py > app.log 2>&1 &
           EOF
