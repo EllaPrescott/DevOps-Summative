@@ -66,8 +66,9 @@ jobs:
         id: tf-ip
         working-directory: terraform
         run: |
-          IP=$(terraform output -raw ec2_public_ip | tr -d '\r' | tr -d '\n' | tr -d '[:space:]')
+          IP=$(terraform output -raw ec2_public_ip | tr -d '\r' | tr -d '\n' | tr -d '\t' | sed 's/ //g')
           echo "ip=$IP" >> $GITHUB_OUTPUT
+
 
 
 
