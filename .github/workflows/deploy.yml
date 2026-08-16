@@ -84,10 +84,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ansible
 
       # Dynamic inventory
-      - name: Create Ansible Inventory
-        run: |
-          echo "[web]" > ansible/inventory.ini
-          echo "${{ steps.tf-ip.outputs.ip }} ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/labsuser.pem" >> ansible/inventory.ini
+      - name: Generate Ansible Inventory
+        run: echo -e "[web]\n${{ steps.tf-ip.outputs.ip }}\n\n[web:vars]\nansible_user=ec2-user\nansible_ssh_private_key_file=~/.ssh/labsuser.pem" > ansible/inventory.ini
+
 
       # Run Ansible playbook
       - name: Run Ansible Playbook
@@ -96,8 +95,7 @@ jobs:
 
       # Deploy Flask App
       - name: Deploy Flask App via SSH
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ steps.tf-ip.outputs.ip }} << 'EOF'
+        run: ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@${{ steps.tf-ip.outputs.ip }} << 'EOF'
            sudo mkdir -p /opt/flaskapp
            sudo rm -rf /opt/flaskapp/app
            sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
