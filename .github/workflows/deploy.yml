@@ -70,7 +70,7 @@ jobs:
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
 
       - name: Debug IP
-        run: echo "EC2 IP is: '${{ steps.tf-ip.outputs.ip }}'"
+        run: echo EC2 IP=${{ steps.tf-ip.outputs.ip }}
 
       # SSH key setup
       - name: Create private key file for SSH
