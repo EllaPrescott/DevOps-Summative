@@ -51,6 +51,8 @@ jobs:
       # Terraform provisioning
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: terraform
