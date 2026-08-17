@@ -108,7 +108,8 @@ jobs:
             sudo rm -rf /opt/flaskapp/app
             sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
             cd /opt/flaskapp/app
-            sudo pip3 install -r app/requirements.txt
+            pyhthon3 -m pip install --upgrade pip
+            python3 -m pip install -r app/requirements.txt
             sudo pkill -f app.py || true
             nohup sudo python3 app.py > app.log 2>&1 &
           EOF

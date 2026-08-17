@@ -5,9 +5,11 @@
       apt:
         name:
           - python3
+          - python3-venv
           - git
           - nginx
         state: present
+        update_chache: yes
 
     - name: Install pip using ensurepip
       command: python3 -m ensurepip --upgrade
