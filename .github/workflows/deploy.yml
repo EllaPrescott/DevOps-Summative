@@ -103,7 +103,7 @@ jobs:
       - name: Deploy Flask App via SSH
         run: |
           EC2_IP=${{ steps.tf-ip.outputs.ip }}
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/labsuser.pem ec2-user@$EC2_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vockey.pem ubuntu@$EC2_IP << 'EOF'
             sudo mkdir -p /opt/flaskapp
             sudo rm -rf /opt/flaskapp/app
             sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
