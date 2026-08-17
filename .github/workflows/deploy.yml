@@ -111,7 +111,7 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -r app/requirements.txt
+            pip install -r ../requirements.txt
             pkill -f app.py || true
             nohup sudo python3 app.py > app.log 2>&1 &
           EOF
