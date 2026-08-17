@@ -104,12 +104,12 @@ jobs:
         run: |
           EC2_IP=${{ steps.tf-ip.outputs.ip }}
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/vockey.pem ubuntu@$EC2_IP << 'EOF'
-            sudo mkdir -p /opt/flaskapp
-            sudo rm -rf /opt/flaskapp/app
-            sudo git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
+            mkdir -p /opt/flaskapp
+            rm -rf /opt/flaskapp/app
+            git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
             cd /opt/flaskapp/app
-            source venv/bin/activate
             python3 -m venv venv
+            source venv/bin/activate
             pip install --upgrade pip
             pip install -r app/requirements.txt
             pkill -f app.py || true
