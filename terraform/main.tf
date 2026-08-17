@@ -102,8 +102,8 @@ resource "aws_security_group" "flask" {
   }
 }
 
-resource "aws_key_pair" "vockey" {
-  key_name   = "vockey"
+resource "aws_key_pair" "vockey2" {
+  key_name   = "vockey2"
   public_key = file("${path.module}/vockey.pub")
 }
 
@@ -115,7 +115,7 @@ resource "aws_instance" "flask" {
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.flask.id]
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.vockey.key_name
+  key_name                    = aws_key_pair.vockey2.key_name
 
   tags = {
     Name = "FlaskApp"
