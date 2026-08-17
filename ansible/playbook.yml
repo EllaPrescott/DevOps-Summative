@@ -9,7 +9,7 @@
           - git
           - nginx
         state: present
-        update_chache: yes
+        update_cache: yes
 
     - name: Install pip using ensurepip
       command: python3 -m ensurepip --upgrade
