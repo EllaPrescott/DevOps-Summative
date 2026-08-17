@@ -11,8 +11,6 @@
         state: present
         update_cache: yes
 
-    - name: Install pip using ensurepip
-      command: python3 -m ensurepip --upgrade
 
     - name: Ensure application directory exists
       file:
