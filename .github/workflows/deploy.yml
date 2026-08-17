@@ -76,7 +76,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/vockey.pem
-          chmod 600 ~/.ssh/vockey
+          chmod 600 ~/.ssh/vockey.pem
 
       # Install Ansible
       - name: Install Ansible
