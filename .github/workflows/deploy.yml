@@ -106,12 +106,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/vockey.pem ubuntu@$EC2_IP << 'EOF'
             mkdir -p /opt/flaskapp
             rm -rf /opt/flaskapp/app
-            git clone https://github.com/${{ github.repository }} /opt/flaskapp/app
+            git clone https://github.com/${{ github.repository }} /opt/flaskapp
             cd /opt/flaskapp/app
             python3 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -r app/requirements.txt
+            pip install -r requirements.txt
             pkill -f app.py || true
             nohup python3 app.py > app.log 2>&1 &
           EOF
