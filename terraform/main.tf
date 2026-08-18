@@ -110,7 +110,7 @@ resource "aws_key_pair" "vockey2" {
 # EC2 instance creation for Flask App
 
 resource "aws_instance" "flask" {
-  ami                         = "ami-0e86e20dae9224db8"
+  ami                         = "ami-0c7217cdde317cfec"
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.flask.id]
