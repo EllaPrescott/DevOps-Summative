@@ -18,7 +18,7 @@ resource "aws_vpc" "main" {
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
 
   tags = {
@@ -110,7 +110,7 @@ resource "aws_key_pair" "vockey2" {
 # EC2 instance creation for Flask App
 
 resource "aws_instance" "flask" {
-  ami                         = "ami-0c7217cdde317cfec"
+  ami                         = "ami-08c40ec9ead489470"
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.flask.id]
