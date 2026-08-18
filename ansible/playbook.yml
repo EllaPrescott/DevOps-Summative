@@ -1,6 +1,13 @@
 - hosts: web
   become: yes
   tasks:
+
+    - name: Wait for dpkg lock
+      shell: |
+        while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do
+          sleep 3
+        done
+
     - name: Install required packages
       apt:
         name:
