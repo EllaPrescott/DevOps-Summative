@@ -1,6 +1,3 @@
-
-
-
 # VPC creation
 
 resource "aws_vpc" "main" {
@@ -107,15 +104,34 @@ resource "aws_key_pair" "vockey2" {
   public_key = file("${path.module}/vockey.pub")
 }
 
+# Amazon Linux AMI
+data "aws_ami" "amazon_linux" {
+    most_recent = true
+    owners = ["amazon"]
+
+    filter {
+        name = "name"
+        values = ["al2023-ami-*-x86_64"]
+    }
+}
+
 # EC2 instance creation for Flask App
 
 resource "aws_instance" "flask" {
-  ami                         = "ami-08c40ec9ead489470"
+  ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.flask.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.vockey2.key_name
+
+  user_data = <<-EOF
+  #!/bin/bash
+  dnf update -y
+  dnf install python3 python3-pip git nginx -y
+  mkdir -p /opt/flaskapp
+  chmod 777 /opt/flaskapp
+  EOF
 
   tags = {
     Name = "FlaskApp"
