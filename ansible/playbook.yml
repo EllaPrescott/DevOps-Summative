@@ -65,6 +65,12 @@
           [Install]
           WantedBy=multi-user.target
 
+    - name: Enable and start nginx
+      systemd:
+        name: nginx
+        enabled: yes
+        state: restarted
+
     - name: Enable and start Flask
       systemd:
         name: flask
