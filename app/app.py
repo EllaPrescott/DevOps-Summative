@@ -10,7 +10,7 @@ app = Flask(__name__)
 def dashboard():
     # Sample data
     data = {
-        "monthly_spend": 1200,
+        "monthly_spend": 1250,
         "monthly_transactions": 42,
         "fraud_rate": "0.4%",
         "declines": 3
