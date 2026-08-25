@@ -16,9 +16,6 @@ def dashboard():
         "declines": 3
     }
 
-@app.route("/health")
-def health():
-    return {"status": "healthy"}
 
 
     # Interactive element: user can add a transaction amount
@@ -32,6 +29,10 @@ def health():
             pass
 
     return render_template("index.html", data=data, new_transaction=new_transaction)
+
+@app.route("/health")
+def health():
+    return {"status": "healthy"}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
