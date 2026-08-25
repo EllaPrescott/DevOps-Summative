@@ -63,13 +63,6 @@ resource "aws_security_group" "flask" {
   description = "Allow Flask and SSH"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    description = "Flask"
-    from_port   = 5000
-    to_port     = 5000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   ingress {
     description = "HTTP"
@@ -99,6 +92,7 @@ resource "aws_security_group" "flask" {
   }
 }
 
+#Key Pair creation for EC2 instance
 resource "aws_key_pair" "vockey2" {
   key_name   = "vockey2"
   public_key = file("${path.module}/vockey.pub")
