@@ -1,0 +1,101 @@
+name: Flask CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - developer
+
+jobs:
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install -r app/requirements.txt
+
+      - name: Run Tests
+        run: pytest
+
+
+  deploy:
+    name: Deploy to EC2
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      ec2_ip: ${{ steps.tf-ip.outputs.ip }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # AWS credentials block
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      # Terraform provisioning
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      # EC2 public IP retrieval 
+      - name: Get EC2 public IP
+        id: tf-ip
+        working-directory: terraform
+        run: |
+          echo "ip=$(terraform output -raw ec2_public_ip)" >> "$GITHUB_OUTPUT"
+
+      # SSH key setup
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/vockey.pem
+          chmod 600 ~/.ssh/vockey.pem
+
+      # Install Ansible
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      # Dynamic inventory
+      - name: Generate Ansible Inventory
+        run: |
+          echo "[web]" > ansible/inventory.ini
+          echo "${{ steps.tf-ip.outputs.ip }}" >> ansible/inventory.ini
+          echo "" >> ansible/inventory.ini
+          echo "[web:vars]" >> ansible/inventory.ini
+          echo "ansible_user=ec2-user" >> ansible/inventory.ini
+          echo "ansible_ssh_private_key_file=~/.ssh/vockey.pem" >> ansible/inventory.ini
+
+      # Run Ansible playbook
+      - name: Run Ansible Playbook
+        working-directory: ansible
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: ansible-playbook -i inventory.ini playbook.yml
+
+
+

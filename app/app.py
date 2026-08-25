@@ -1,10 +1,14 @@
+import logging
+logging.basicConfig(filename='flask.log', level=logging.INFO)
+
+
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def dashboard():
-    # Sample data for Version 1
+    # Sample data
     data = {
         "monthly_spend": 1250,
         "monthly_transactions": 42,
@@ -12,7 +16,9 @@ def dashboard():
         "declines": 3
     }
 
-    # Simple interactive element: user can add a transaction amount
+
+
+    # Interactive element: user can add a transaction amount
     new_transaction = None
     if request.method == "POST":
         try:
@@ -24,5 +30,9 @@ def dashboard():
 
     return render_template("index.html", data=data, new_transaction=new_transaction)
 
+@app.route("/health")
+def health():
+    return {"status": "healthy"}
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)

@@ -1,18 +1,14 @@
-# DevOps Summative – Simple Flask Web Application
+# Digital Wallet Dashboard Flask Web Application
 
-This is Version 1 of the Digital Wallet Dashboard used for the DevOps assessment.  
-The application is intentionally simple because the functionality is not graded.  
-Its purpose is to provide a real application that can be deployed using:
+This repository contains the pipeline required to deploy the web application to the cloud
 
+The web application is built from sample data and includes an interactive element to update spend and transactions
+
+Software used for the build of application and pipeline:
+- Flask
+- Terraform
+- Ansible
 - GitHub
-- CI/CD pipeline
-- Infrastructure as Code (Terraform)
-- Cloud hosting
+- AWS Academy Sandbox
 
-## Features (Version 1)
-- Flask backend
-- Simple dashboard with sample data
-- One interactive element (add a transaction)
-- Basic HTML and CSS structure
-
-Future versions will be updated as part of the assessment 
+Changes to the pipeline were built on the developer branch and then merged to the main after testing and validation
